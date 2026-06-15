@@ -1,22 +1,44 @@
-name: Test and Analyze
+name: Release quality
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
   pull_request:
-    branches: [ "main" ]
+    branches: ["main"]
 
 jobs:
-  build:
+  validate:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: subosito/flutter-action@v2
         with:
-          channel: 'stable'
+          channel: stable
       - name: Install dependencies
         run: dart pub get
+      - name: Check formatting
+        run: dart format --output=none --set-exit-if-changed lib test tool example/lib example/test
       - name: Analyze code
         run: dart analyze
-      - name: Run tests
-        run: dart test
+      - name: Run pure Dart smoke test
+        run: dart run tool/pure_dart_smoke.dart
+      - name: Run package tests with coverage
+        run: |
+          dart test --coverage=coverage
+          dart run coverage:format_coverage \
+            --lcov \
+            --in=coverage \
+            --out=coverage/lcov.info \
+            --packages=.dart_tool/package_config.json \
+            --report-on=lib
+          dart run tool/check_coverage.dart coverage/lcov.info 95
+      - name: Analyze and test example application
+        working-directory: example
+        run: |
+          flutter pub get
+          flutter analyze
+          flutter test
+      - name: Generate API documentation
+        run: dart doc --output=/tmp/flutter_validators_api
+      - name: Validate pub package
+        run: dart pub publish --dry-run

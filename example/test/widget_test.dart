@@ -1,59 +1,95 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
+import 'package:example/main.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import 'package:example/main.dart';
+import 'package:flutter_validators/flutter_validators.dart';
 
 void main() {
-  testWidgets('Form validation smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
+  tearDown(Validator.resetMessageResolver);
+
+  testWidgets('registration demonstrates composition and conditional fields', (
+    tester,
+  ) async {
     await tester.pumpWidget(const MyApp());
 
-    // Locate the TextFormField widgets
-    final emailField = find.byType(TextFormField).at(0);
-    final urlField = find.byType(TextFormField).at(1);
-    final creditCardField = find.byType(TextFormField).at(2);
-    final numericField = find.byType(TextFormField).at(3);
+    await tester.ensureVisible(find.byKey(const Key('registration-submit')));
+    await tester.tap(find.byKey(const Key('registration-submit')));
+    await tester.pump();
+    expect(find.text('Email is required'), findsOneWidget);
 
-    // Enter invalid values
-    await tester.enterText(emailField, 'invalid-email');
-    await tester.enterText(urlField, 'invalid-url');
-    await tester.enterText(creditCardField, '1234');
-    await tester.enterText(numericField, 'abc');
-
-    // Tap the submit button
-    await tester.tap(find.text('Submit'));
-    await tester.pumpAndSettle();
-
-    // Verify that validation errors appear
-    expect(find.text('Please enter a valid email address'), findsOneWidget);
-    expect(find.text('Please provide a valid URL'), findsOneWidget);
-    expect(find.text('Please enter a valid credit card number'), findsOneWidget);
-    expect(find.text('Please enter a valid number'), findsOneWidget);
-
-    // Enter valid values
-    await tester.enterText(emailField, 'test@example.com');
-    await tester.enterText(urlField, 'https://example.com');
-    await tester.enterText(creditCardField, '4111111111111111');
-    await tester.enterText(numericField, '25');
-
-    // Tap the submit button again
-    await tester.tap(find.text('Submit'));
-    await tester.pumpAndSettle();
-
-    // Verify that validation errors disappear
-    expect(find.text('Please enter a valid email address'), findsNothing);
-    expect(find.text('Please provide a valid URL'), findsNothing);
-    expect(find.text('Please enter a valid credit card number'), findsNothing);
-    expect(find.text('Please enter a valid number'), findsNothing);
-
-    // Verify success state (e.g., success SnackBar appears)
-    expect(find.text('Form is valid!'), findsOneWidget);
+    await tester.enterText(
+      find.byKey(const Key('registration-email')),
+      'person@example.com',
+    );
+    await tester.enterText(
+      find.byKey(const Key('registration-password')),
+      'Strong123!',
+    );
+    await tester.ensureVisible(find.byKey(const Key('registration-submit')));
+    await tester.tap(find.byKey(const Key('registration-submit')));
+    await tester.pump();
+    expect(find.text('Registration is valid'), findsOneWidget);
   });
+
+  testWidgets('finance validates IBAN, BIC, and ISBN', (tester) async {
+    await tester.pumpWidget(const MyApp());
+    await _openTab(tester, 'Finance');
+
+    await tester.enterText(
+      find.byKey(const Key('finance-iban')),
+      'GB82 WEST 1234 5698 7654 32',
+    );
+    await tester.enterText(find.byKey(const Key('finance-bic')), 'DEUTDEFF');
+    await tester.enterText(
+      find.byKey(const Key('finance-isbn')),
+      '978-0-306-40615-7',
+    );
+    await tester.ensureVisible(find.byKey(const Key('finance-submit')));
+    await tester.tap(find.byKey(const Key('finance-submit')));
+    await tester.pump();
+    expect(find.text('Financial identifiers are valid'), findsOneWidget);
+  });
+
+  testWidgets('strict tab compares compatibility and strict results', (
+    tester,
+  ) async {
+    await tester.pumpWidget(const MyApp());
+    await _openTab(tester, 'Strict');
+    expect(find.text('Accepted'), findsNWidgets(4));
+
+    await tester.tap(find.byKey(const Key('strict-switch')));
+    await tester.pump();
+    expect(find.text('Rejected'), findsNWidgets(4));
+  });
+
+  testWidgets('sanitizer tab shows before and after output', (tester) async {
+    await tester.pumpWidget(const MyApp());
+    await _openTab(tester, 'Sanitizers');
+
+    await tester.tap(find.byKey(const Key('sanitizer-run')));
+    await tester.pump();
+    expect(find.text('After: testuser@gmail.com'), findsOneWidget);
+  });
+
+  testWidgets('message tab switches locale through the resolver', (
+    tester,
+  ) async {
+    await tester.pumpWidget(const MyApp());
+    await _openTab(tester, 'Messages');
+
+    await tester.enterText(
+      find.byKey(const Key('message-email')),
+      'not-an-email',
+    );
+    await tester.tap(find.byKey(const Key('message-locale')));
+    await tester.tap(find.byKey(const Key('message-submit')));
+    await tester.pump();
+    expect(find.text('Introduce un correo válido'), findsOneWidget);
+  });
+}
+
+Future<void> _openTab(WidgetTester tester, String label) async {
+  final tab = find.text(label);
+  await tester.ensureVisible(tab);
+  await tester.tap(tab);
+  await tester.pumpAndSettle();
 }

@@ -66,7 +66,7 @@ packages:
     source: hosted
     version: "3.0.1"
   coverage:
-    dependency: transitive
+    dependency: "direct dev"
     description:
       name: coverage
       sha256: ad538fa2e8f6b828d54c04a438af816ce814de404690136d3b9dfb3a436cd01c
@@ -387,4 +387,3 @@ packages:
     version: "3.1.0"
 sdks:
   dart: ">=3.7.0 <4.0.0"
-  flutter: ">=1.17.0"

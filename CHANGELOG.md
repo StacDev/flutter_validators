@@ -1,3 +1,17 @@
+## 1.3.0
+
+* Added generic `FieldValidator<T>` composition with `compose`, `aggregate`,
+  `any`, conditional rules, transforms, and fluent chaining.
+* Added dependency-free `ValidationMessage` resolution with runtime locale
+  switching and explicit-message precedence.
+* Added opt-in strict JWT, Base32, credit-card, URL, email, FQDN, UUID, and
+  ISO-8601 calendar validation without changing 1.2 defaults.
+* Added numeric range rules; date and time rules; text boundaries and word
+  counts; IBAN, BIC, CVC, and card-expiry checks; ISBN-10/13; hash, MIME, and
+  data-URI validation.
+* Expanded form factories, documentation, migration guides, executable
+  examples, adversarial tests, and release-quality CI checks.
+
 ## 1.2.0
 
 * Added 21 new validators inspired by validator.js: `isLowercase`, `isUppercase`,

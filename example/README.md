@@ -1,17 +1,27 @@
-# example
+# Flutter Validators Example
 
-A new Flutter project.
+This application is an executable guide to the 1.3 APIs.
 
-## Getting Started
+## Run
 
-This project is a starting point for a Flutter application.
+```sh
+flutter pub get
+flutter run
+```
 
-A few resources to get you started if this is your first Flutter project:
+## Walkthrough
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
+- **Registration**: required/optional fields, fluent composition, conditional
+  validation, strong passwords, and custom messages.
+- **Finance**: IBAN, BIC, and ISBN checksum validation.
+- **Strict**: side-by-side results for permissive and strict date, JWT, Base32,
+  and credit-card rules.
+- **Sanitizers**: before-and-after trimming and email normalization.
+- **Messages**: dependency-free locale switching with `ValidationMessage`.
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+The source comments in `lib/main.dart` call out empty-value and composition
+behavior. Run the demonstrated flows as widget tests:
+
+```sh
+flutter test
+```
