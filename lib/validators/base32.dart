@@ -1,52 +1,43 @@
-/// Checks if the string is base32 encoded.
+/// Checks whether [str] uses the RFC 4648 Base32 alphabet.
 ///
-/// Base32 encoding uses a 32-character set (A-Z and 2-7) to represent binary data.
-/// Valid base32 strings may include padding with '=' characters.
-///
-/// Returns `true` if the string is valid base32 encoded, otherwise returns `false`.
-///
-/// Example:
-/// ```dart
-/// isBase32('JBSWY3DPEHPK3PXP'); // true
-/// isBase32('hello world'); // false
-/// ```
-bool isBase32(String str) => _isBase32(str);
-
-/// Extension providing base32 validation methods on [String].
-extension Base32X on String {
-  /// Checks if the string is base32 encoded.
-  ///
-  /// Base32 encoding uses a 32-character set (A-Z and 2-7) to represent binary data.
-  /// Valid base32 strings may include padding with '=' characters.
-  ///
-  /// Returns `true` if the string is valid base32 encoded, otherwise returns `false`.
-  ///
-  /// Example:
-  /// ```dart
-  /// 'JBSWY3DPEHPK3PXP'.isBase32; // true
-  /// 'hello world'.isBase32; // false
-  /// ```
-  bool get isBase32 {
-    return _isBase32(this);
-  }
+/// Set [strict] to enforce valid encoded lengths and exact padding.
+bool isBase32(String str, {bool strict = false}) {
+  return _isBase32(str, strict: strict);
 }
 
-/// Internal implementation for base32 validation.
-///
-/// Validates if a string is base32 encoded using a regular expression
-/// that matches uppercase letters A-Z, digits 2-7, and optional padding
-/// with '=' characters at the end.
-bool _isBase32(String str) {
-  if (str.isEmpty) return false;
-  if (!RegExp(r'^[A-Z2-7]+={0,6}$').hasMatch(str)) return false;
+bool _isBase32(String str, {required bool strict}) {
+  if (str.isEmpty || !RegExp(r'^[A-Z2-7]+={0,6}$').hasMatch(str)) return false;
 
-  final paddingIdx = str.indexOf('=');
-  if (paddingIdx != -1) {
-    if (str.length % 8 != 0) return false;
-    final padCount = str.length - paddingIdx;
-    if (padCount != 1 && padCount != 3 && padCount != 4 && padCount != 6) {
+  final paddingIndex = str.indexOf('=');
+  final dataLength = paddingIndex == -1 ? str.length : paddingIndex;
+  final padding = str.length - dataLength;
+  if (padding > 0) {
+    if (str.length % 8 != 0 || !const {1, 3, 4, 6}.contains(padding)) {
       return false;
     }
   }
-  return true;
+  if (!strict) return true;
+
+  final remainder = dataLength % 8;
+  if (!const {0, 2, 4, 5, 7}.contains(remainder)) return false;
+  final expectedPadding = switch (remainder) {
+    0 => 0,
+    2 => 6,
+    4 => 4,
+    5 => 3,
+    7 => 1,
+    _ => -1,
+  };
+  return padding == 0 || padding == expectedPadding;
+}
+
+/// Base32 validation helpers on [String].
+extension Base32X on String {
+  /// Uses the compatibility Base32 rules.
+  bool get isBase32 => _isBase32(this, strict: false);
+
+  /// Validates Base32 with optional strict length and padding rules.
+  bool isBase32With({bool strict = false}) {
+    return _isBase32(this, strict: strict);
+  }
 }

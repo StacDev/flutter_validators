@@ -2,424 +2,158 @@
   <img src="https://raw.githubusercontent.com/StacDev/flutter_validators/main/assets/banner.png" alt="Flutter Validators Banner" />
 </p>
 
-<p align="center">
-  <h1 align="center">Flutter Validators</h1>
-</p>
+# Flutter Validators
 
-<p align="center">
-  <strong>The most comprehensive string validation package for Dart & Flutter.</strong>
-</p>
+Dependency-free validation, sanitization, generic composition, localized
+messages, and Flutter form helpers for Dart and Flutter.
 
-<p align="center">
-  <a href="https://pub.dev/packages/flutter_validators"><img src="https://img.shields.io/pub/v/flutter_validators.svg?logo=dart&color=blue" alt="Pub Version"></a>
-  <a href="https://github.com/StacDev/flutter_validators/actions"><img src="https://github.com/StacDev/flutter_validators/actions/workflows/test.yml/badge.svg" alt="CI"></a>
-  <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-green" alt="MIT License"></a>
-  <a href="https://github.com/StacDev/flutter_validators/stargazers"><img src="https://img.shields.io/github/stars/StacDev/flutter_validators?style=flat&logo=github&colorB=green&label=stars" alt="Stars"></a>
-</p>
+[![Pub Version](https://img.shields.io/pub/v/flutter_validators.svg?logo=dart&color=blue)](https://pub.dev/packages/flutter_validators)
+[![CI](https://github.com/StacDev/flutter_validators/actions/workflows/test.yml/badge.svg)](https://github.com/StacDev/flutter_validators/actions/workflows/test.yml)
+[![License](https://img.shields.io/badge/License-MIT-green)](LICENSE)
 
-<p align="center">
-  Inspired by <a href="https://github.com/validatorjs/validator.js">validator.js</a> · 40+ validators & sanitizers · Works with Flutter Forms out of the box
-</p>
+Version 1.3 keeps all 1.2 validation defaults and adds opt-in strict rules,
+generic `FieldValidator<T>` composition, resolver-backed messages, and
+high-value validators for dates, finance, identifiers, and data formats.
 
----
+## Features
 
-**Flutter Validators** is a pure Dart package with **40+ string validators** and **13 sanitizers** — from emails and URLs to credit cards, UUIDs, JWTs and strong-password checks. Every validator works three ways:
+- Pure Dart with zero runtime dependencies.
+- Functions, `String` extensions, and `TextFormField`-ready factories.
+- Generic composition for strings, numbers, booleans, collections, and models.
+- Optional strict validation without breaking permissive 1.2 defaults.
+- Dependency-free localized message resolution.
+- 60+ validators and 13 sanitizers.
 
-- as a **top-level function** — `isEmail('foo@bar.com')`
-- as a **`String` extension** — `'foo@bar.com'.isEmail`
-- as a **Flutter form validator** — `Validator.email()` plugs straight into `TextFormField`
+## Which API Should I Use?
 
-Zero runtime dependencies. Fully tested. Works with both Dart and Flutter.
+| API | Best for | Example | Return type |
+|---|---|---|---|
+| Function | services, parsing, tests | `isEmail(value)` | `bool` |
+| Extension | concise application code | `value.isEmail` | `bool` |
+| Form factory | Flutter forms and messages | `Validator.email()` | `FieldValidator<String>` |
+| Composition | reusable business rules | `compose([ruleA, ruleB])` | `FieldValidator<T>` |
 
----
+All non-required form validators accept `null` and `''`. Add
+`Validator.required()` when a value must be present.
 
-## 📚 Table of Contents
+## Installation
 
-- [✨ Features](#-features)
-- [📦 Installation](#-installation)
-- [🚀 Quick Start](#-quick-start)
-- [🧩 Validators](#-validators)
-  - [Contact and Web](#contact-and-web)
-  - [Numbers](#numbers)
-  - [Text and Format](#text-and-format)
-  - [Encoding and Data](#encoding-and-data)
-  - [Identifiers and Crypto](#identifiers-and-crypto)
-  - [Security](#security)
-- [🧹 Sanitizers](#-sanitizers)
-  - [Trimming](#trimming)
-  - [HTML Escaping](#html-escaping)
-  - [Character Filtering](#character-filtering)
-  - [Type Conversion](#type-conversion)
-  - [Email Normalization](#email-normalization)
-- [📝 Flutter Form Integration](#-flutter-form-integration)
-- [💡 Behavior Notes and FAQ](#-behavior-notes-and-faq)
-- [🤝 Contributing](#-contributing)
-- [📄 License](#-license)
-
----
-
-## ✨ Features
-
-- **40+ validators** covering email, URL, numbers, encodings, identifiers, crypto hashes and more.
-- **13 sanitizers** for trimming, HTML escaping, character filtering and type conversion.
-- **Three usage styles** — top-level functions, `String` extensions, and Flutter form validators — pick whatever reads best.
-- **First-class Flutter form support** via the `Validator` class, which returns `String? Function(String?)` closures with customizable error messages.
-- **Pure Dart, zero runtime dependencies** — lightweight and safe to add to any project.
-- **Fully tested** — every validator and sanitizer has dedicated test coverage.
-
----
-
-## 📦 Installation
-
-Add the package to your `pubspec.yaml`:
-
-```yaml
-dependencies:
-  flutter_validators: ^1.2.0
-```
-
-Then run:
+Pure Dart:
 
 ```sh
-dart pub get
+dart pub add flutter_validators
 ```
 
----
+Flutter:
 
-## 🚀 Quick Start
+```sh
+flutter pub add flutter_validators
+```
 
-Import the package:
+Then import the public library:
 
 ```dart
 import 'package:flutter_validators/flutter_validators.dart';
 ```
 
-**As `String` extensions** — the most concise style:
+## Five-Minute Quick Start
 
-```dart
-'foo@bar.com'.isEmail;           // true
-'https://google.com'.isURL;      // true
-'4111111111111111'.isCreditCard; // true
-'abc123'.isAlphanumeric;         // true
-```
-
-**As top-level functions** — handy when the value isn't a literal:
-
-```dart
-isEmail('foo@bar.com');     // true
-isURL('https://google.com'); // true
-isIP('192.168.1.1');        // true
-```
-
-**As Flutter form validators** — drop straight into `TextFormField`:
-
-```dart
-TextFormField(
-  validator: Validator.email(errorMessage: 'Enter a valid email'),
-)
-```
-
----
-
-## 🧩 Validators
-
-Every validator is available **both** as a top-level function and as a `String` extension. Parameterized validators accept their options as named/positional arguments.
-
-### Contact and Web
-
-| Validator | Extension | Description |
-|---|---|---|
-| `isEmail(str)` | `str.isEmail` | Valid email address |
-| `isURL(str)` | `str.isURL` | Valid HTTP/HTTPS URL |
-| `isFQDN(str)` | `str.isFQDN` | Fully qualified domain name |
-| `isPhone(str)` | `str.isPhone` | Phone number (international & US formats) |
-| `isLatLong(str)` | `str.isLatLong` | `latitude,longitude` coordinate pair |
-
-```dart
-'user@example.com'.isEmail;   // true
-'https://dart.dev'.isURL;     // true
-'sub.example.co.uk'.isFQDN;   // true
-'localhost'.isFQDN;           // false (no TLD)
-'(123) 456-7890'.isPhone;     // true
-'40.7128,-74.0060'.isLatLong; // true
-```
-
-### Numbers
-
-| Validator | Extension | Description |
-|---|---|---|
-| `isInt(str)` | `str.isInt` | Integer (positive or negative) |
-| `isNumeric(str)` | `str.isNumeric` | Number (integer or float) |
-| `isFloat(str, {min, max})` | `str.isFloat({min, max})` | Finite float, optionally within a range |
-| `isDecimal(str)` | `str.isDecimal` | Decimal number |
-| `isHexadecimal(str)` | `str.isHexadecimal` | Hexadecimal number |
-| `isOctal(str)` | `str.isOctal` | Octal number |
-| `isPort(str)` | `str.isPort` | Port number (0–65535) |
-
-```dart
-'42'.isInt;                      // true
-'3.14'.isNumeric;                // true
-'1.5'.isFloat();                 // true
-'5'.isFloat(min: 0, max: 2);     // false (out of range)
-'.5'.isDecimal;                  // true
-'deadBEEF'.isHexadecimal;        // true
-'0o17'.isOctal;                  // true
-'8080'.isPort;                   // true
-'65536'.isPort;                  // false (out of range)
-```
-
-### Text and Format
-
-| Validator | Extension | Description |
-|---|---|---|
-| `isAlpha(str)` | `str.isAlpha` | Letters only (a–z, A–Z) |
-| `isAlphanumeric(str)` | `str.isAlphanumeric` | Letters and numbers only |
-| `isAscii(str)` | `str.isAscii` | ASCII characters only |
-| `isLowercase(str)` | `str.isLowercase` | Entirely lowercase |
-| `isUppercase(str)` | `str.isUppercase` | Entirely uppercase |
-| `isLength(str, min, [max])` | `str.isLength(min, [max])` | Length within a range |
-| `isByteLength(str, min, [max])` | `str.isByteLength(min, [max])` | UTF-8 byte length within a range |
-| `isSlug(str)` | `str.isSlug` | URL slug (`my-blog-post`) |
-| `isIn(str, values)` | `str.isIn(values)` | One of an allowed set of values |
-| `matches(str, pattern)` | `str.matches(pattern)` | Matches a `Pattern` / `RegExp` |
-| `contains(str, seed, {ignoreCase, minOccurrences})` | — | Contains a substring |
-| `equals(str, comparison)` | `str.equals(comparison)` | Exact (case-sensitive) string match |
-
-```dart
-'Hello'.isAlpha;                       // true
-'abc123'.isAlphanumeric;               // true
-'héllo'.isAscii;                       // false
-'hello'.isLowercase;                   // true
-'abc'.isLength(2, 5);                  // true
-'é'.isByteLength(2, 2);                // true ('é' is 2 bytes in UTF-8)
-'my-blog-post'.isSlug;                 // true
-'red'.isIn(['red', 'green', 'blue']);  // true
-'abc123'.matches(RegExp(r'\d+'));      // true
-'foo'.equals('foo');                   // true
-
-// `contains` is a top-level function only (see Behavior Notes)
-contains('hello world', 'world');                  // true
-contains('Hello World', 'world', ignoreCase: true); // true
-contains('a-a-a', 'a', minOccurrences: 3);          // true
-```
-
-### Encoding and Data
-
-| Validator | Extension | Description |
-|---|---|---|
-| `isBase32(str)` | `str.isBase32` | Base32 encoded |
-| `isBase58(str)` | `str.isBase58` | Base58 encoded |
-| `isBase64(str, {urlSafe})` | `str.isBase64({urlSafe})` | Base64 encoded (standard or URL-safe) |
-| `isJson(str)` | `str.isJson` | Valid JSON |
-| `isHexColor(str)` | `str.isHexColor` | Hex color code (`#fff`, `ff0000`) |
-| `isBoolean(str)` | `str.isBoolean` | Boolean string (`true`/`false`/`1`/`0`) |
-| `isDate(str)` | `str.isDate` | Parseable date string |
-
-```dart
-'JBSWY3DP'.isBase32;             // true
-'aGVsbG8='.isBase64();           // true
-'a-b_cdef'.isBase64(urlSafe: true); // true
-'{"name":"Dart"}'.isJson;        // true
-'#ff0000'.isHexColor;            // true
-'true'.isBoolean;                // true
-'2024-01-15'.isDate;             // true
-```
-
-### Identifiers and Crypto
-
-| Validator | Extension | Description |
-|---|---|---|
-| `isUUID(str)` | `str.isUUID` | UUID (v1, v3, v4, v5) |
-| `isMongoId(str)` | `str.isMongoId` | MongoDB ObjectId (24-char hex) |
-| `isMD5(str)` | `str.isMD5` | MD5 hash |
-| `isJWT(str)` | `str.isJWT` | JSON Web Token |
-| `isCreditCard(str)` | `str.isCreditCard` | Credit card number (Luhn algorithm) |
-| `isMACAddress(str)` | `str.isMACAddress` | MAC address (EUI-48 / EUI-64) |
-| `isSemVer(str)` | `str.isSemVer` | Semantic version |
-
-```dart
-'550e8400-e29b-41d4-a716-446655440000'.isUUID; // true
-'507f1f77bcf86cd799439011'.isMongoId;          // true
-'d41d8cd98f00b204e9800998ecf8427e'.isMD5;      // true
-'eyJhbGci.eyJzdWIi.SflKxwRJ'.isJWT;            // true
-'4111111111111111'.isCreditCard;               // true
-'00:1B:44:11:3A:B7'.isMACAddress;              // true
-'2.1.0-alpha.1'.isSemVer;                       // true
-```
-
-### Security
-
-| Validator | Extension | Description |
-|---|---|---|
-| `isStrongPassword(str, {...})` | `str.isStrongPassword({...})` | Password meets configurable strength rules |
-
-`isStrongPassword` accepts five options, all with sensible defaults:
-
-| Option | Default | Meaning |
-|---|---|---|
-| `minLength` | `8` | Minimum total length |
-| `minLowercase` | `1` | Minimum lowercase letters |
-| `minUppercase` | `1` | Minimum uppercase letters |
-| `minNumbers` | `1` | Minimum digits |
-| `minSymbols` | `1` | Minimum non-alphanumeric symbols |
-
-```dart
-'Abcd1234!'.isStrongPassword();  // true
-'weak'.isStrongPassword();       // false
-
-// Relax the rules — e.g. allow passphrases with no symbols or digits
-'abcdefghij'.isStrongPassword(
-  minUppercase: 0,
-  minNumbers: 0,
-  minSymbols: 0,
-); // true
-```
-
----
-
-## 🧹 Sanitizers
-
-Sanitizers transform or coerce strings. Like validators, they're available as both top-level functions and `String` extensions. Import them via the main library or directly:
+This complete Dart program validates, sanitizes, and composes rules:
 
 ```dart
 import 'package:flutter_validators/flutter_validators.dart';
-// or, sanitizers only:
-import 'package:flutter_validators/sanitizers.dart';
+
+void main() {
+  final rawEmail = '  Test.User+news@GMAIL.com  ';
+  final cleaned = trim(rawEmail);
+  final normalized = normalizeEmail(cleaned);
+
+  final emailRule = compose<String>([
+    Validator.required(),
+    Validator.email(),
+  ]);
+
+  print(normalized); // testuser@gmail.com
+  print(emailRule(normalized)); // null
+  print(isURL('https://dart.dev')); // true
+  print('2024-02-29'.isISO8601Date); // true
+}
 ```
 
-### Trimming
-
-| Sanitizer | Extension | Description |
-|---|---|---|
-| `trim(str, [chars])` | `str.trimChars(chars)` | Trim whitespace/chars from both ends |
-| `ltrim(str, [chars])` | `str.ltrimChars(chars)` | Trim from the start |
-| `rtrim(str, [chars])` | `str.rtrimChars(chars)` | Trim from the end |
-
-```dart
-trim('  hello  ');        // 'hello'
-trim('xxhelloxx', 'x');   // 'hello'
-ltrim('00042', '0');      // '42'
-rtrim('hello!!!', '!');   // 'hello'
-```
-
-### HTML Escaping
-
-| Sanitizer | Extension | Description |
-|---|---|---|
-| `escape(str)` | `str.escape()` | Escape HTML-unsafe characters |
-| `unescape(str)` | `str.unescape()` | Reverse of `escape` |
-
-```dart
-escape('<script>alert(1)</script>');
-// '&lt;script&gt;alert(1)&lt;&#x2F;script&gt;'
-
-unescape('&lt;b&gt;hi&lt;&#x2F;b&gt;'); // '<b>hi</b>'
-```
-
-### Character Filtering
-
-| Sanitizer | Extension | Description |
-|---|---|---|
-| `blacklist(str, chars)` | `str.blacklist(chars)` | Remove the listed characters |
-| `whitelist(str, chars)` | `str.whitelist(chars)` | Keep only the listed characters |
-| `stripLow(str, {keepNewLines})` | `str.stripLow({keepNewLines})` | Remove ASCII control characters |
-
-```dart
-blacklist('hello world', 'lo');              // 'he wrd'
-whitelist('a1b2c3', '0123456789');           // '123'
-stripLow('line1\nline2');                    // 'line1line2'
-stripLow('line1\nline2', keepNewLines: true); // 'line1\nline2'
-```
-
-### Type Conversion
-
-| Sanitizer | Extension | Returns | Description |
-|---|---|---|---|
-| `toBoolean(str, {strict})` | `str.toBoolean({strict})` | `bool` | Convert to a boolean |
-| `toInt(str, {radix})` | `str.toInt({radix})` | `int?` | Parse to an integer |
-| `toFloat(str)` | `str.toFloat()` | `double?` | Parse to a double |
-| `toDate(str)` | `str.toDate()` | `DateTime?` | Parse to a `DateTime` |
-
-```dart
-toBoolean('true');             // true
-toBoolean('0');                // false
-toBoolean('yes', strict: true); // false (strict: only '1'/'true' are true)
-toInt('42');                   // 42
-toInt('ff', radix: 16);        // 255
-toInt('abc');                  // null
-toFloat('3.14');               // 3.14
-toDate('2024-01-15');          // DateTime(2024, 1, 15)
-```
-
-### Email Normalization
-
-| Sanitizer | Extension | Returns | Description |
-|---|---|---|---|
-| `normalizeEmail(str)` | `str.normalizeEmail()` | `String?` | Canonicalize an email address |
-
-```dart
-normalizeEmail('Test.User+promo@GMAIL.com'); // 'testuser@gmail.com'
-normalizeEmail('User@Example.COM');          // 'User@example.com'
-normalizeEmail('not-an-email');              // null
-```
-
----
-
-## 📝 Flutter Form Integration
-
-The `Validator` class returns `String? Function(String?)` closures — exactly the type `TextFormField.validator` expects. A closure returns `null` when the value is valid, or the error message when it isn't. Every method accepts a custom `errorMessage`.
+A complete Flutter field:
 
 ```dart
 import 'package:flutter/material.dart';
 import 'package:flutter_validators/flutter_validators.dart';
 
-class SignUpForm extends StatefulWidget {
-  const SignUpForm({super.key});
+class EmailField extends StatelessWidget {
+  const EmailField({super.key});
 
   @override
-  State<SignUpForm> createState() => _SignUpFormState();
+  Widget build(BuildContext context) {
+    return TextFormField(
+      keyboardType: TextInputType.emailAddress,
+      autovalidateMode: AutovalidateMode.onUserInteraction,
+      decoration: const InputDecoration(labelText: 'Email'),
+      validator: Validator.required(errorMessage: 'Email is required')
+          .and(Validator.email(errorMessage: 'Enter a valid email')),
+    );
+  }
+}
+```
+
+## Registration Form
+
+The runnable example contains the full screen. This smaller complete form shows
+required fields, composition, password rules, conditional validation, and
+custom messages:
+
+```dart
+import 'package:flutter/material.dart';
+import 'package:flutter_validators/flutter_validators.dart';
+
+class RegistrationForm extends StatefulWidget {
+  const RegistrationForm({super.key});
+
+  @override
+  State<RegistrationForm> createState() => _RegistrationFormState();
 }
 
-class _SignUpFormState extends State<SignUpForm> {
-  final _formKey = GlobalKey<FormState>();
+class _RegistrationFormState extends State<RegistrationForm> {
+  final key = GlobalKey<FormState>();
+  bool createTeam = false;
 
   @override
   Widget build(BuildContext context) {
     return Form(
-      key: _formKey,
+      key: key,
       child: Column(
         children: [
-          // Combine `required` with `email` to enforce a non-empty, valid email.
           TextFormField(
             decoration: const InputDecoration(labelText: 'Email'),
-            autovalidateMode: AutovalidateMode.onUserInteraction,
-            validator: (value) {
-              return Validator.required(errorMessage: 'Email is required')(value) ??
-                  Validator.email(errorMessage: 'Enter a valid email')(value);
-            },
+            validator: Validator.required().and(Validator.email()),
           ),
           TextFormField(
-            decoration: const InputDecoration(labelText: 'Website'),
-            autovalidateMode: AutovalidateMode.onUserInteraction,
-            validator: Validator.url(),
-          ),
-          TextFormField(
-            decoration: const InputDecoration(labelText: 'Password'),
             obscureText: true,
-            autovalidateMode: AutovalidateMode.onUserInteraction,
-            validator: Validator.strongPassword(
-              errorMessage: 'Use 8+ chars with upper, lower, number & symbol',
+            decoration: const InputDecoration(labelText: 'Password'),
+            validator: Validator.required().and(
+              Validator.strongPassword(
+                errorMessage: 'Use upper, lower, number, and symbol',
+              ),
             ),
           ),
+          SwitchListTile(
+            title: const Text('Create a team'),
+            value: createTeam,
+            onChanged: (value) => setState(() => createTeam = value),
+          ),
+          TextFormField(
+            decoration: const InputDecoration(labelText: 'Team name'),
+            validator: Validator.required().when((_) => createTeam),
+          ),
           ElevatedButton(
-            onPressed: () {
-              if (_formKey.currentState!.validate()) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Form is valid!')),
-                );
-              }
-            },
-            child: const Text('Sign Up'),
+            onPressed: () => key.currentState!.validate(),
+            child: const Text('Register'),
           ),
         ],
       ),
@@ -428,91 +162,298 @@ class _SignUpFormState extends State<SignUpForm> {
 }
 ```
 
-A complete, runnable app is in the [`example/`](example/) directory.
+Run all interactive examples:
 
-### Validator API Reference
-
-Every method on the `Validator` class returns `String? Function(String?)`:
-
-```dart
-Validator.required({String errorMessage})
-Validator.email({String errorMessage})
-Validator.url({String errorMessage})
-Validator.ip({int? version, String errorMessage})
-Validator.fqdn({String errorMessage})
-Validator.phone({String errorMessage})
-Validator.latLong({String errorMessage})
-Validator.date({String errorMessage})
-Validator.numeric({String errorMessage})
-Validator.integer({String errorMessage})
-Validator.float({double? min, double? max, String errorMessage})
-Validator.decimal({String errorMessage})
-Validator.hexadecimal({String errorMessage})
-Validator.octal({String errorMessage})
-Validator.port({String errorMessage})
-Validator.alpha({String errorMessage})
-Validator.alphanumeric({String errorMessage})
-Validator.ascii({String errorMessage})
-Validator.lowercase({String errorMessage})
-Validator.uppercase({String errorMessage})
-Validator.slug({String errorMessage})
-Validator.length(int min, {int? max, String errorMessage})
-Validator.byteLength(int min, {int? max, String errorMessage})
-Validator.contains(String seed, {bool ignoreCase, int minOccurrences, String errorMessage})
-Validator.matches(Pattern pattern, {String errorMessage})
-Validator.inList(Iterable<String> allowed, {String errorMessage})
-Validator.equals(String comparison, {String errorMessage})
-Validator.base32({String errorMessage})
-Validator.base58({String errorMessage})
-Validator.base64({bool urlSafe, String errorMessage})
-Validator.json({String errorMessage})
-Validator.hexColor({String errorMessage})
-Validator.boolean({String errorMessage})
-Validator.uuid({String errorMessage})
-Validator.mongoId({String errorMessage})
-Validator.md5({String errorMessage})
-Validator.jwt({String errorMessage})
-Validator.creditCard({String errorMessage})
-Validator.macAddress({String errorMessage})
-Validator.semVer({String errorMessage})
-Validator.strongPassword({int minLength, int minLowercase, int minUppercase, int minNumbers, int minSymbols, String errorMessage})
+```sh
+cd example
+flutter run
 ```
 
----
+## Composition
 
-## 💡 Behavior Notes and FAQ
-
-**`Validator` methods treat `null` and empty strings as valid.** This is intentional — it lets you compose validators freely. To make a field mandatory, pair it with `Validator.required()`:
+`compose` stops at the first error. `aggregate` returns all errors. `any`
+succeeds when one rule succeeds.
 
 ```dart
-validator: (value) {
-  return Validator.required()(value) ?? Validator.email()(value);
-}
+final requiredEmail = compose<String>([
+  Validator.required(),
+  Validator.email(),
+]);
+
+final passwordReport = aggregate<String>([
+  Validator.length(12, errorMessage: 'Use at least 12 characters'),
+  Validator.matches(RegExp(r'\d'), errorMessage: 'Add a number'),
+]);
+
+final contact = any<String>([
+  Validator.email(),
+  Validator.url(),
+], errorMessage: 'Enter an email or URL');
+
+final fluent = Validator.required()
+    .and(Validator.email())
+    .when((value) => value != 'skip')
+    .withMessage('Enter a usable email');
 ```
 
-**`contains` is a top-level function only.** Dart's `String` already has a built-in `.contains()` method, so the package does not add a conflicting extension. Use `contains(str, seed)` instead of `str.contains(...)` when you need the case-insensitivity or `minOccurrences` options.
+Generic rules work beyond strings:
 
-**Trimming extensions are named `trimChars` / `ltrimChars` / `rtrimChars`.** Dart's `String` already provides `.trim()`, `.trimLeft()` and `.trimRight()` for whitespace, so the custom-character variants use distinct names to avoid collisions. The top-level functions keep the plain `trim` / `ltrim` / `rtrim` names.
+```dart
+final positiveAge = when<int>(
+  (value) => value != null,
+  (value) => value! > 0 ? null : 'Age must be positive',
+);
 
-**`isURL` accepts only `http` and `https` schemes.** Other schemes such as `ftp://` are rejected.
+final evenItemCount = transform<List<String>, int>(
+  (items) => items?.length,
+  (length) => length == null || length.isEven ? null : 'Use an even count',
+);
+```
 
-**`isBase64` has a `urlSafe` option.** By default it validates the standard Base64 alphabet (with padding); pass `urlSafe: true` to validate the URL- and filename-safe alphabet instead.
+See [Composition recipes](doc/composition.md) for `unless`, `skipWhen`, `.or()`,
+and model validation.
 
-**`isBoolean` accepts `'true'`, `'false'`, `'1'` and `'0'`.** Any other value is not a boolean string.
+## Optional And Required Fields
 
-**`isFloat` rejects non-finite values.** `'Infinity'` and `'NaN'` return `false`, even though Dart's `double.tryParse` can parse them.
+```dart
+final optionalWebsite = Validator.url();
+optionalWebsite(null); // null
+optionalWebsite(''); // null
 
-**`normalizeEmail` applies Gmail-specific rules.** For `gmail.com` / `googlemail.com` addresses it lowercases the local part, removes dots, and strips any `+tag` suffix. For other providers it only lowercases the domain. It returns `null` if the input isn't a valid email.
+final requiredWebsite = Validator.required().and(Validator.url());
+requiredWebsite(''); // "This field is required"
+```
 
----
+## Strict And Configurable Validation
 
-## 🤝 Contributing
+Old behavior remains the default. Strictness is explicit:
 
-Contributions, issues, and feature requests are welcome!
-Feel free to check the [issues page](https://github.com/StacDev/flutter_validators/issues).
+```dart
+isDate('2023-13-01'); // true: DateTime.tryParse rollover
+isISO8601Date('2023-13-01'); // false: real YYYY-MM-DD calendar date
 
----
+isJWT('aaa.bbb.'); // true: structural compatibility check
+isJWT('aaa.bbb.', strict: true); // false: decoded JSON is required
 
-## 📄 License
+isBase32('ABC'); // true: compatibility mode
+isBase32('ABC', strict: true); // false: invalid encoded length
 
-This project is [MIT](LICENSE) licensed.
+isCreditCard('0000000000000000'); // true: Luhn compatibility mode
+isCreditCard('0000000000000000', strict: true); // false
+```
+
+Configure web and identifier rules:
+
+```dart
+isEmail('δοκιμή@παράδειγμα.δοκιμή', allowUnicode: true);
+isEmail('person@localhost', requireTld: false);
+isURL('ftp://example.com', protocols: const ['ftp'], requireTld: true);
+isFQDN('service_name.example.com', allowUnderscores: true);
+isUUID('550e8400-e29b-41d4-a716-446655440000', 4);
+```
+
+The same options are available from `Validator.email`, `Validator.url`,
+`Validator.fqdn`, `Validator.uuid`, `Validator.jwt`, `Validator.base32`, and
+`Validator.creditCard`. See [Strict validation](doc/strict-validation.md).
+
+## New Validator Recipes
+
+Numeric and date ranges:
+
+```dart
+isPositive('12.5');
+isNegative('-2');
+isInRange('18', 13, 120);
+isDivisibleBy('24', 6);
+
+isTime('23:59:59');
+isBefore('2024-12-31', DateTime.utc(2025));
+isAfter('2025-01-02', DateTime.utc(2025));
+```
+
+Text:
+
+```dart
+startsWith('Flutter validators', 'flutter', ignoreCase: true);
+endsWith('report.pdf', '.pdf');
+isSingleLine('one line');
+hasWordCount('a short profile', min: 2, max: 20);
+```
+
+Finance and identifiers:
+
+```dart
+isIBAN('GB82 WEST 1234 5698 7654 32');
+isBIC('DEUTDEFF');
+isCreditCardCVC('123');
+isCreditCardExpirationDate(
+  '06/30',
+  referenceDate: DateTime(2030, 6),
+);
+isISBN('0-306-40615-2', version: 10);
+isISBN('978-0-306-40615-7', version: 13);
+```
+
+Data and security:
+
+```dart
+isHash(
+  'e3b0c44298fc1c149afbf4c8996fb924'
+  '27ae41e4649b934ca495991b7852b855',
+  HashAlgorithm.sha256,
+);
+isMimeType('application/json');
+isDataURI('data:text/plain;base64,SGVsbG8=');
+```
+
+Each has a form factory such as `Validator.range`, `Validator.before`,
+`Validator.wordCount`, `Validator.iban`, `Validator.isbn`,
+`Validator.mimeType`, and `Validator.dataURI`.
+
+## Sanitization
+
+Validation answers whether input is acceptable. Sanitization changes input.
+
+```dart
+final cleaned = trim('  User@Example.COM  ');
+final normalized = normalizeEmail(cleaned); // User@example.com
+
+final safeText = escape('<b>Hello</b>');
+final digits = whitelist('+1 (415) 555-0100', '0123456789');
+final count = toInt('42');
+```
+
+Sanitize first, then validate the transformed value:
+
+```dart
+final email = normalizeEmail(trim(rawInput));
+final error = Validator.required().and(Validator.email())(email);
+```
+
+## Localized Messages
+
+No localization package is required. Set a resolver that maps stable keys and
+parameters into the current locale:
+
+```dart
+var locale = 'en';
+
+Validator.messageResolver = (message) {
+  final translations = {
+    'es': {
+      'required': 'Este campo es obligatorio',
+      'email': 'Introduce un correo válido',
+    },
+  };
+  return translations[locale]?[message.key] ?? message.fallback;
+};
+
+final rule = Validator.required().and(Validator.email());
+locale = 'es';
+rule('bad'); // "Introduce un correo válido"
+
+Validator.email(errorMessage: 'Account email is invalid')('bad');
+// Explicit text always wins.
+
+Validator.resetMessageResolver();
+```
+
+See [Message resolution](doc/messages.md) for parameter interpolation and
+locale lifecycle guidance.
+
+## Behavior Reference
+
+| Area | Default | Opt-in behavior |
+|---|---|---|
+| Non-required form validators | `null` and `''` are valid | compose with `required()` |
+| Date | `DateTime.tryParse` | `isISO8601Date` |
+| JWT | three valid-looking segments | `strict: true` decodes JSON |
+| Base32 | valid alphabet and compatible padding | strict encoded lengths |
+| Credit card | length plus Luhn | network pattern and repeated-digit rejection |
+| URL | HTTP/HTTPS URI with authority | protocols, TLD, localhost, underscore rules |
+| Email | 1.2 ASCII behavior | Unicode, local domain, IP domain, max length |
+| Messages | English fallback | application resolver or explicit message |
+
+| API kind | Empty string | Invalid input | Valid input |
+|---|---|---|---|
+| Function/extension | validator-specific `false` | `false` | `true` |
+| Form factory except `required` | `null` | error string | `null` |
+| `required` | error string | `null` | `null` |
+| Sanitizer | transformed value | transformed value or nullable conversion | transformed value |
+
+## Common Mistakes
+
+- `Validator.email()` does not require a value. Compose it with
+  `Validator.required()`.
+- `isDate()` intentionally uses permissive Dart parsing. Use
+  `isISO8601Date()` for calendar input.
+- Sanitizers do not prove validity. Validate the sanitized result.
+- Credit-card validation checks syntax and checksums only. It cannot verify
+  ownership, funds, issuer status, or whether a payment will succeed.
+- Strict JWT validation decodes structure; it does not verify signatures.
+
+## Migration
+
+From `flutter_validators 1.2`: no existing public symbol was removed or
+renamed, and permissive defaults remain. Update the constraint and adopt strict
+options gradually.
+
+```yaml
+dependencies:
+  flutter_validators: ^1.3.0
+```
+
+From the legacy `validators` package, import this package and replace calls
+incrementally. Most common function names are compatible; parameterized and
+form APIs should be migrated explicitly.
+
+See the full [Migration guide](doc/migration.md).
+
+## Public API Index
+
+- Composition: `FieldValidator`, `compose`, `aggregate`, `any`, `conditional`,
+  `when`, `unless`, `skipWhen`, `transform`, `.and()`, `.or()`,
+  `.withMessage()`.
+- Messages: `ValidationMessage`, `ValidationMessageResolver`,
+  `ValidationMessages`, `Validator.messageResolver`.
+- Web/contact: `isEmail`, `isURL`, `isFQDN`, `isPhone`, `isIP`, `isLatLong`.
+- Numbers: `isInt`, `isNumeric`, `isDecimal`, `isFloat`, `isPositive`,
+  `isNegative`, `isInRange`, `isDivisibleBy`, `isPort`.
+- Dates: `isDate`, `isISO8601Date`, `isTime`, `isBefore`, `isAfter`.
+- Text: `isAlpha`, `isAlphanumeric`, `isAscii`, `isLength`, `isByteLength`,
+  `isLowercase`, `isUppercase`, `startsWith`, `endsWith`, `isSingleLine`,
+  `hasWordCount`, `contains`, `matches`, `equals`, `isIn`, `isSlug`.
+- Finance/IDs: `isCreditCard`, `isCreditCardCVC`,
+  `isCreditCardExpirationDate`, `isIBAN`, `isBIC`, `isISBN`, `isUUID`,
+  `isMongoId`, `isMACAddress`.
+- Data/security: `isJson`, `isJWT`, `isBase32`, `isBase58`, `isBase64`,
+  `isHexadecimal`, `isHexColor`, `isMD5`, `isHash`, `HashAlgorithm`,
+  `isMimeType`, `isDataURI`, `isSemVer`, `isStrongPassword`, `isBoolean`,
+  `isOctal`.
+- Sanitizers: `trim`, `ltrim`, `rtrim`, `escape`, `unescape`, `blacklist`,
+  `whitelist`, `stripLow`, `normalizeEmail`, `toBoolean`, `toInt`, `toFloat`,
+  `toDate`.
+- Forms: `Validator` exposes factories for every validator where form input is
+  appropriate.
+
+API reference is generated from source documentation on
+[pub.dev](https://pub.dev/documentation/flutter_validators/latest/).
+
+## Contributing
+
+Run the same checks as CI:
+
+```sh
+dart format --output=none --set-exit-if-changed lib test tool
+dart analyze
+dart test
+cd example && flutter test
+```
+
+Issues and pull requests are welcome at the
+[GitHub repository](https://github.com/StacDev/flutter_validators).
+Maintainers should follow the [1.3 release checklist](doc/releasing.md).
+
+## License
+
+MIT. See [LICENSE](LICENSE).

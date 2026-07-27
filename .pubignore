@@ -13,3 +13,6 @@ example/.dart_tool/
 test_output.log
 assets/
 build/
+coverage/
+test/
+tool/

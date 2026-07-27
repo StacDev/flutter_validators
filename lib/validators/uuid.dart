@@ -1,24 +1,24 @@
-/// Checks if the string is a valid UUID (versions 1, 3, 4, or 5).
+/// Checks whether [str] is a UUID.
 ///
-/// Returns `true` if the string matches the UUID format, otherwise returns `false`.
-///
-/// Example:
-/// ```dart
-/// isUUID('123e4567-e89b-12d3-a456-426614174000'); // true
-/// isUUID('invalid-uuid'); // false
-/// ```
-bool isUUID(String str) => _isUUID(str);
-
-/// Extension providing UUID validation methods on [String].
-extension UuidX on String {
-  /// Checks if the string is a valid UUID.
-  bool get isUUID {
-    return _isUUID(this);
-  }
+/// With no [version], versions 1, 3, 4, and 5 are accepted for compatibility.
+bool isUUID(String str, [int? version]) {
+  return _isUUID(str, version);
 }
 
-bool _isUUID(String str) {
+bool _isUUID(String str, [int? version]) {
+  final versionPattern = version == null ? '[1345]' : '$version';
+  if (version != null && (version < 1 || version > 5)) return false;
   return RegExp(
-    r'^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1345][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$',
+    '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-$versionPattern[0-9a-fA-F]{3}-'
+    '[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}\$',
   ).hasMatch(str);
+}
+
+/// UUID validation helpers on [String].
+extension UuidX on String {
+  /// Accepts UUID versions 1, 3, 4, and 5.
+  bool get isUUID => _isUUID(this);
+
+  /// Validates a specific UUID [version], or the compatibility set when null.
+  bool isUUIDVersion([int? version]) => _isUUID(this, version);
 }
