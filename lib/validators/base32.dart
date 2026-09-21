@@ -36,9 +36,11 @@ extension Base32X on String {
 /// Validates if a string is base32 encoded using a regular expression
 /// that matches uppercase letters A-Z, digits 2-7, and optional padding
 /// with '=' characters at the end.
+final _base32 = RegExp(r'^[A-Z2-7]+={0,6}$');
+
 bool _isBase32(String str) {
   if (str.isEmpty) return false;
-  if (!RegExp(r'^[A-Z2-7]+={0,6}$').hasMatch(str)) return false;
+  if (!_base32.hasMatch(str)) return false;
 
   final paddingIdx = str.indexOf('=');
   if (paddingIdx != -1) {

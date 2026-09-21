@@ -75,7 +75,7 @@ Add the package to your `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  flutter_validators: ^1.2.0
+  flutter_validators: ^1.3.0
 ```
 
 Then run:
@@ -148,7 +148,7 @@ Every validator is available **both** as a top-level function and as a `String` 
 
 | Validator | Extension | Description |
 |---|---|---|
-| `isInt(str)` | `str.isInt` | Integer (positive or negative) |
+| `isInt(str)` | `str.isInt` | Decimal integer (positive or negative) |
 | `isNumeric(str)` | `str.isNumeric` | Number (integer or float) |
 | `isFloat(str, {min, max})` | `str.isFloat({min, max})` | Finite float, optionally within a range |
 | `isDecimal(str)` | `str.isDecimal` | Decimal number |
@@ -393,10 +393,10 @@ class _SignUpFormState extends State<SignUpForm> {
           TextFormField(
             decoration: const InputDecoration(labelText: 'Email'),
             autovalidateMode: AutovalidateMode.onUserInteraction,
-            validator: (value) {
-              return Validator.required(errorMessage: 'Email is required')(value) ??
-                  Validator.email(errorMessage: 'Enter a valid email')(value);
-            },
+            validator: Validator.compose([
+              Validator.required(errorMessage: 'Email is required'),
+              Validator.email(errorMessage: 'Enter a valid email'),
+            ]),
           ),
           TextFormField(
             decoration: const InputDecoration(labelText: 'Website'),
@@ -435,6 +435,7 @@ A complete, runnable app is in the [`example/`](example/) directory.
 Every method on the `Validator` class returns `String? Function(String?)`:
 
 ```dart
+Validator.compose(Iterable<String? Function(String?)> validators)
 Validator.required({String errorMessage})
 Validator.email({String errorMessage})
 Validator.url({String errorMessage})
@@ -482,19 +483,24 @@ Validator.strongPassword({int minLength, int minLowercase, int minUppercase, int
 
 ## 💡 Behavior Notes and FAQ
 
-**`Validator` methods treat `null` and empty strings as valid.** This is intentional — it lets you compose validators freely. To make a field mandatory, pair it with `Validator.required()`:
+**`Validator` methods treat `null` and empty strings as valid.** This is intentional — it lets you compose validators freely. Individual validators still skip empty values; to make a field mandatory, pair them with `Validator.required()` using `Validator.compose`:
 
 ```dart
-validator: (value) {
-  return Validator.required()(value) ?? Validator.email()(value);
-}
+validator: Validator.compose([
+  Validator.required(),
+  Validator.email(),
+])
 ```
 
 **`contains` is a top-level function only.** Dart's `String` already has a built-in `.contains()` method, so the package does not add a conflicting extension. Use `contains(str, seed)` instead of `str.contains(...)` when you need the case-insensitivity or `minOccurrences` options.
 
 **Trimming extensions are named `trimChars` / `ltrimChars` / `rtrimChars`.** Dart's `String` already provides `.trim()`, `.trimLeft()` and `.trimRight()` for whitespace, so the custom-character variants use distinct names to avoid collisions. The top-level functions keep the plain `trim` / `ltrim` / `rtrim` names.
 
-**`isURL` accepts only `http` and `https` schemes.** Other schemes such as `ftp://` are rejected.
+**`isURL` accepts only `http` and `https` schemes** and requires a real host. Other schemes such as `ftp://` are rejected. The host must be `localhost`, an IP address, or a name that contains a dot — so `https://` and `http://foo` fail, while `http://localhost` and `https://example.com` pass.
+
+**`isDate` requires a real calendar date.** ISO-8601 strings whose `YYYY-MM-DD` prefix is not a valid calendar date (for example `2023-13-01` or `2023-02-29`) are rejected.
+
+**`isInt` accepts decimal integers only.** Hex literals such as `0x10` are rejected. Leading zeros and surrounding whitespace are still allowed.
 
 **`isBase64` has a `urlSafe` option.** By default it validates the standard Base64 alphabet (with padding); pass `urlSafe: true` to validate the URL- and filename-safe alphabet instead.
 

@@ -19,6 +19,8 @@ extension HexColorX on String {
   }
 }
 
+final _hexColor = RegExp(r'^#?([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$');
+
 bool _isHexColor(String str) {
-  return RegExp(r'^#?([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$').hasMatch(str);
+  return _hexColor.hasMatch(str);
 }

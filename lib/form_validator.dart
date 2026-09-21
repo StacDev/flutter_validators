@@ -1,5 +1,42 @@
-import 'package:flutter_validators/flutter_validators.dart';
-import 'package:flutter_validators/validators/contains.dart' as contains_fn;
+import 'validators/alpha.dart';
+import 'validators/ascii.dart';
+import 'validators/base32.dart';
+import 'validators/base58.dart';
+import 'validators/base64.dart';
+import 'validators/boolean.dart';
+import 'validators/byte_length.dart';
+import 'validators/contains.dart' as contains_fn;
+import 'validators/credit_card.dart';
+import 'validators/date.dart';
+import 'validators/decimal.dart';
+import 'validators/email.dart';
+import 'validators/equals.dart';
+import 'validators/float.dart';
+import 'validators/fqdn.dart';
+import 'validators/hex_color.dart';
+import 'validators/hexadecimal.dart';
+import 'validators/in.dart';
+import 'validators/int.dart';
+import 'validators/ip.dart';
+import 'validators/json.dart';
+import 'validators/jwt.dart';
+import 'validators/lat_long.dart';
+import 'validators/length.dart';
+import 'validators/lowercase.dart';
+import 'validators/mac_address.dart';
+import 'validators/matches.dart';
+import 'validators/md5.dart';
+import 'validators/mongo_id.dart';
+import 'validators/numeric.dart';
+import 'validators/octal.dart';
+import 'validators/phone.dart';
+import 'validators/port.dart';
+import 'validators/semver.dart';
+import 'validators/slug.dart';
+import 'validators/strong_password.dart';
+import 'validators/uppercase.dart';
+import 'validators/url.dart';
+import 'validators/uuid.dart';
 
 /// A utility class for Flutter Form validation.
 /// Provides methods that return a validator function suitable for `TextFormField`.
@@ -7,7 +44,10 @@ import 'package:flutter_validators/validators/contains.dart' as contains_fn;
 /// Example:
 /// ```dart
 /// TextFormField(
-///   validator: Validator.email(errorMessage: 'Please enter a valid email'),
+///   validator: Validator.compose([
+///     Validator.required(errorMessage: 'Email is required'),
+///     Validator.email(errorMessage: 'Please enter a valid email'),
+///   ]),
 /// )
 /// ```
 class Validator {
@@ -17,6 +57,27 @@ class Validator {
   }) {
     return (String? value) =>
         value == null || value.trim().isEmpty ? errorMessage : null;
+  }
+
+  /// Runs [validators] in order and returns the first error, or `null` if all pass.
+  ///
+  /// Example:
+  /// ```dart
+  /// validator: Validator.compose([
+  ///   Validator.required(errorMessage: 'Email is required'),
+  ///   Validator.email(errorMessage: 'Enter a valid email'),
+  /// ])
+  /// ```
+  static String? Function(String?) compose(
+    Iterable<String? Function(String?)> validators,
+  ) {
+    return (String? value) {
+      for (final validator in validators) {
+        final error = validator(value);
+        if (error != null) return error;
+      }
+      return null;
+    };
   }
 
   /// Ensures the string is a valid email.

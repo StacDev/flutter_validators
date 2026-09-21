@@ -22,6 +22,18 @@ void main() {
       expect(email(null), isNull);
     });
 
+    test('compose runs validators in order and returns the first error', () {
+      final email = Validator.compose([
+        Validator.required(errorMessage: 'Email is required'),
+        Validator.email(errorMessage: 'Enter a valid email'),
+      ]);
+      expect(email(''), 'Email is required');
+      expect(email(null), 'Email is required');
+      expect(email('  '), 'Email is required');
+      expect(email('invalid'), 'Enter a valid email');
+      expect(email('user@example.com'), isNull);
+    });
+
     test('Length validator', () {
       final len = Validator.length(3, max: 5, errorMessage: 'Bad len');
       expect(len('abc'), isNull);

@@ -40,8 +40,10 @@ extension EmailX on String {
 /// - Domain part: can be an IP address or domain name with TLD of at least 2 characters
 ///
 /// The regex handles common email formats including quoted strings and subdomains.
+final _email = RegExp(
+  r'^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$',
+);
+
 bool _isEmail(String str) {
-  return RegExp(
-    r'^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$',
-  ).hasMatch(str);
+  return _email.hasMatch(str);
 }

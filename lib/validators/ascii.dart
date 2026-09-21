@@ -31,6 +31,8 @@ extension AsciiX on String {
 ///
 /// Validates if a string contains only ASCII characters using a regular expression
 /// that matches characters in the range \x00-\x7F (code points 0-127).
+final _ascii = RegExp(r'^[\x00-\x7F]+$');
+
 bool _isAscii(String str) {
-  return RegExp(r'^[\x00-\x7F]+$').hasMatch(str);
+  return _ascii.hasMatch(str);
 }

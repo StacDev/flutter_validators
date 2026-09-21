@@ -14,6 +14,8 @@ void main() {
     test('Invalid integers', () {
       expect('12.34'.isInt, isFalse);
       expect('abc'.isInt, isFalse);
+      expect('0x10'.isInt, isFalse);
+      expect('0X10'.isInt, isFalse);
       expect(''.isInt, isFalse);
     });
   });
