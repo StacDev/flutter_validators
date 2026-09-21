@@ -43,13 +43,18 @@ class _ExampleScreenState extends State<ExampleScreen> {
             children: [
               TextFormField(
                 decoration: const InputDecoration(labelText: 'Email'),
-                validator: Validator.email(),
+                validator: Validator.compose([
+                  Validator.required(errorMessage: 'Email is required'),
+                  Validator.email(),
+                ]),
                 autovalidateMode: AutovalidateMode.onUserInteraction,
               ),
               const SizedBox(height: 16),
               TextFormField(
                 decoration: const InputDecoration(labelText: 'URL'),
-                validator: Validator.url(errorMessage: 'Please provide a valid URL'),
+                validator: Validator.url(
+                  errorMessage: 'Please provide a valid URL',
+                ),
                 autovalidateMode: AutovalidateMode.onUserInteraction,
               ),
               const SizedBox(height: 16),

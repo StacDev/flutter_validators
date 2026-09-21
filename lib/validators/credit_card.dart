@@ -17,9 +17,12 @@ extension CreditCardX on String {
   }
 }
 
+final _creditCardSeparators = RegExp(r'[\s\-]');
+final _creditCardDigits = RegExp(r'^\d{13,19}$');
+
 bool _isCreditCard(String str) {
-  final sanitized = str.replaceAll(RegExp(r'[\s\-]'), '');
-  if (!RegExp(r'^\d{13,19}$').hasMatch(sanitized)) return false;
+  final sanitized = str.replaceAll(_creditCardSeparators, '');
+  if (!_creditCardDigits.hasMatch(sanitized)) return false;
 
   int sum = 0;
   bool alternate = false;

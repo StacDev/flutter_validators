@@ -1,3 +1,14 @@
+## 1.3.0
+
+* Added `Validator.compose` to run multiple form validators in order.
+* Fixed `isURL` to require a real host (`https://`, `http://.`, and `http://foo`
+  are rejected; `localhost` and IP hosts remain valid).
+* Fixed `isDate` to reject calendar-invalid dates such as `2023-13-01` and
+  `2023-02-29`.
+* Fixed `isInt` to accept decimal integers only (hex literals like `0x10` are
+  rejected).
+* The package is now a pure Dart package: the Flutter SDK is no longer required.
+
 ## 1.2.0
 
 * Added 21 new validators inspired by validator.js: `isLowercase`, `isUppercase`,

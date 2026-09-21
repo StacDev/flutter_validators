@@ -38,6 +38,8 @@ extension Base58X on String {
 /// Validates if a string is base58 encoded using a regular expression
 /// that matches the base58 character set: A-H, J-N, P-Z, a-k, m-z, and 1-9.
 /// The omitted characters are: 0, O, I, and l to avoid visual ambiguity.
+final _base58 = RegExp(r'^[A-HJ-NP-Za-km-z1-9]+$');
+
 bool _isBase58(String str) {
-  return RegExp(r'^[A-HJ-NP-Za-km-z1-9]+$').hasMatch(str);
+  return _base58.hasMatch(str);
 }

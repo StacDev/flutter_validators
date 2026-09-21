@@ -29,10 +29,13 @@ extension AlphaX on String {
   }
 }
 
+final _alpha = RegExp(r'^[a-zA-Z]+$');
+final _alphanumeric = RegExp(r'^[a-zA-Z0-9]+$');
+
 bool _isAlpha(String str) {
-  return RegExp(r'^[a-zA-Z]+$').hasMatch(str);
+  return _alpha.hasMatch(str);
 }
 
 bool _isAlphanumeric(String str) {
-  return RegExp(r'^[a-zA-Z0-9]+$').hasMatch(str);
+  return _alphanumeric.hasMatch(str);
 }
