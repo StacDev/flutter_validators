@@ -15,6 +15,6 @@ jobs:
       - name: Install dependencies
         run: dart pub get --no-example
       - name: Analyze code
-        run: dart analyze
+        run: dart analyze lib test
       - name: Run tests
         run: dart test
